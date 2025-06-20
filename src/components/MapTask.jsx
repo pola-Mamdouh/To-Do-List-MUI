@@ -5,16 +5,34 @@ import EditIcon from "@mui/icons-material/Edit";
 import DoneIcon from "@mui/icons-material/Done";
 import { Fade, Grow, Zoom, Collapse } from "@mui/material";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 function MapTask({ task, handleUpdateBtn, handlDeleteBtn, toggleTaskCompletion }) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    // Create audio element when component mounts
+    audioRef.current = new Audio();
+    audioRef.current.src = "mixkit-paper-slide-1530.wav";
+    audioRef.current.volume = 0.5;
+  }, []);
 
   const handleDelete = () => {
     setIsDeleting(true);
     setTimeout(() => {
       handlDeleteBtn(task.id);
-    }, 300); // Match this with the Collapse timeout
+    }, 300);
+  };
+
+  const handleTaskCompletion = () => {
+    if (!task.isCompleted && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(error => {
+        console.log("Audio playback failed:", error);
+      });
+    }
+    toggleTaskCompletion(task.id);
   };
 
   return (
@@ -67,7 +85,7 @@ function MapTask({ task, handleUpdateBtn, handlDeleteBtn, toggleTaskCompletion }
             </Zoom>
             <Zoom in={true} timeout={500}>
               <IconButton
-                onClick={() => toggleTaskCompletion(task.id)}
+                onClick={handleTaskCompletion}
                 style={
                   task.isCompleted
                     ? { background: "rgba(46, 204, 113, 1)", color: "#fff" }

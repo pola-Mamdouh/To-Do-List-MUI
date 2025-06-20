@@ -34,6 +34,21 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #1976d2 #e0e0e0;
+}
+
+/* Chrome, Edge, Safari */
+.toDoList::-webkit-scrollbar {
+  width: 8px;
+  background: #e0e0e0;
+}
+.toDoList::-webkit-scrollbar-thumb {
+  background: #1976d2;
+  border-radius: 8px;
+}
+.toDoList::-webkit-scrollbar-thumb:hover {
+  background: #1565c0;
 }
 
 .dark {
@@ -67,10 +82,11 @@ body {
 
 .inputs .MuiButton-root {
   height: 40px;
+  
 }
 
 .navigation {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .navigation .MuiButtonGroup-root {
@@ -104,7 +120,7 @@ body {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 666px) {
   .toDoList {
     padding: 0.5rem 0.2rem;
   }
@@ -137,5 +153,6 @@ body {
     padding-right: 10px;
     font-size: 13px;
     height: 36px;
+    padding: 5px;
   }
 }

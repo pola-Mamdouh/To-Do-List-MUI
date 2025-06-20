@@ -13,9 +13,13 @@ import "./App.css";
 import UpdateModel from "./components/updateModel/UpdateModel";
 import CompletedTasks from "./components/completedTasks/CompletedTasks";
 import NotCompleted from "./components/notCompleted/NotCompleted";
-
+import {v4 as uuidv4} from 'uuid'
 function App() {
-  const [tasks, setTasks] = useState([]);
+
+  const [tasks, setTasks] = useState(() => {
+    const stored = localStorage.getItem('tasks');
+    return stored ? JSON.parse(stored) : [];
+  });
   const [taskInputs, setTaskInputs] = useState({
     title: "",
     desc: "",
@@ -33,6 +37,10 @@ function App() {
   useEffect(() => {
     document.body.classList.toggle("dark", mode === "dark");
   }, [mode]);
+
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
   const theme = useMemo(
     () =>
@@ -84,14 +92,13 @@ function App() {
     { id: 2, name: "Completed", path: "/completed" },
     { id: 3, name: "Not Completed", path: "/notCompleted" },
   ];
-
   const handleAddTask = () => {
     if (!taskInputs.title || !taskInputs.desc) return;
 
     setTasks((prev) => [
       ...prev,
       {
-        id: Date.now(),
+        id: uuidv4(),
         title: taskInputs.title,
         desc: taskInputs.desc,
         isCompleted: false,
@@ -152,6 +159,7 @@ function App() {
       )
     );
   };
+
 
   return (
     <ThemeProvider theme={theme}>
