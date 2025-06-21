@@ -14,6 +14,8 @@ import UpdateModel from "./components/updateModel/UpdateModel";
 import CompletedTasks from "./components/completedTasks/CompletedTasks";
 import NotCompleted from "./components/notCompleted/NotCompleted";
 import {v4 as uuidv4} from 'uuid'
+import MySnackBar from "./components/snackBar/MySnackBar";
+
 function App() {
 
   const [tasks, setTasks] = useState(() => {
@@ -107,21 +109,35 @@ function App() {
     ]);
 
     setTaskInputs({ title: "", desc: "", isCompleted: false });
+    handleSnackBar("Added successfully")
   };
 
   const toggleTaskCompletion = (id) => {
     const dateNow = new Date();
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === id ? { ...task, isCompleted: !task.isCompleted, completedTime: dateNow.toLocaleString() } : task
-      )
-    );
+
+  setTasks((prev) =>
+    prev.map((task) => {
+      if (task.id === id) {
+        const newStatus = !task.isCompleted;
+        // Show the message before returning the updated task
+        handleSnackBar(newStatus ? "Task completed" : "Task marked as not completed");
+        return {
+          ...task,
+          isCompleted: newStatus,
+          completedTime: newStatus ? dateNow.toLocaleString() : null,
+        };
+      }
+      return task;
+    })
+  );
+    
   };
 
   const handleUpdateBtn = (taskId) => {
     const task = tasks.find((task) => task.id === taskId);
     setModelInpts({ ...task });
     setUpdateModel(true);
+    
   };
 
   const handelModelInput = (event) => {
@@ -146,10 +162,12 @@ function App() {
 
     setUpdateModel(false);
     setModelInpts({ title: "", desc: "", id: null });
+    handleSnackBar("Updated successfully")
   };
 
   const handlDeleteBtn = (taskId) => {
     setTasks(tasks.filter((task) => task.id !== taskId));
+    handleSnackBar("Deleted successfully")
   };
 
   const handleDoneTask = (taskId) => {
@@ -159,11 +177,18 @@ function App() {
       )
     );
   };
-
+  const [massage , setMassage]  = useState("");
+  const [open, setOpen] = useState(false)
+  const handleSnackBar = (massage) => {
+    setOpen(true)
+    setMassage(massage)
+    setTimeout(() => {setOpen(false)}, 2000)
+  }
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      
       <div className={`toDoList${mode === "dark" ? " dark" : ""}`}>
         <Container maxWidth="lg">
           <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginBottom: 16 }}>
@@ -273,6 +298,7 @@ function App() {
             />
           )}
         </Container>
+        <MySnackBar open={open}  massage={massage}/>
       </div>
     </ThemeProvider>
   );
