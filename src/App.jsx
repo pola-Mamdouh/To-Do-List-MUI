@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useReducer } from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
@@ -15,13 +15,15 @@ import CompletedTasks from "./components/completedTasks/CompletedTasks";
 import NotCompleted from "./components/notCompleted/NotCompleted";
 import {v4 as uuidv4} from 'uuid'
 import MySnackBar from "./components/snackBar/MySnackBar";
-
+import TasksReducer from "./reducers/TasksReducer";
 function App() {
 
-  const [tasks, setTasks] = useState(() => {
+  // Initialize tasks from localStorage if available
+  const getInitialTasks = () => {
     const stored = localStorage.getItem('tasks');
     return stored ? JSON.parse(stored) : [];
-  });
+  };
+  const [tasks, dispatch] = useReducer(TasksReducer, [], getInitialTasks);
   const [taskInputs, setTaskInputs] = useState({
     title: "",
     desc: "",
@@ -97,40 +99,14 @@ function App() {
   const handleAddTask = () => {
     if (!taskInputs.title || !taskInputs.desc) return;
 
-    setTasks((prev) => [
-      ...prev,
-      {
-        id: uuidv4(),
-        title: taskInputs.title,
-        desc: taskInputs.desc,
-        isCompleted: false,
-        completedTime: '',
-      },
-    ]);
+    dispatch({type: "added", payload: {newTaskTitle: taskInputs.title, newTaskDesc: taskInputs.desc}})
 
     setTaskInputs({ title: "", desc: "", isCompleted: false });
     handleSnackBar("Added successfully")
   };
 
   const toggleTaskCompletion = (id) => {
-    const dateNow = new Date();
-
-  setTasks((prev) =>
-    prev.map((task) => {
-      if (task.id === id) {
-        const newStatus = !task.isCompleted;
-        // Show the message before returning the updated task
-        handleSnackBar(newStatus ? "Task completed" : "Task marked as not completed");
-        return {
-          ...task,
-          isCompleted: newStatus,
-          completedTime: newStatus ? dateNow.toLocaleString() : null,
-        };
-      }
-      return task;
-    })
-  );
-    
+    dispatch({ type: "toggleDoneBtn", payload: { taskId: id } });
   };
 
   const handleUpdateBtn = (taskId) => {
@@ -148,34 +124,28 @@ function App() {
   const handelSaveUpdateChanges = () => {
     if (!modelIpts.title || !modelIpts.desc) return;
 
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === modelIpts.id
-          ? {
-              ...task,
-              title: modelIpts.title,
-              desc: modelIpts.desc,
-            }
-          : task
-      )
-    );
+    dispatch({
+      type: "updated",
+      payload: {
+        id: modelIpts.id,
+        title: modelIpts.title,
+        desc: modelIpts.desc,
+      },
+    });
 
     setUpdateModel(false);
     setModelInpts({ title: "", desc: "", id: null });
-    handleSnackBar("Updated successfully")
+    handleSnackBar("Updated successfully");
   };
 
   const handlDeleteBtn = (taskId) => {
-    setTasks(tasks.filter((task) => task.id !== taskId));
+    dispatch({type: 'deleted' ,payload : {taskId} })
     handleSnackBar("Deleted successfully")
   };
 
   const handleDoneTask = (taskId) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === taskId ? { ...task, isCompleted: true } : task
-      )
-    );
+
+    dispatch({type: "done", payload: {taskId}})
   };
   const [massage , setMassage]  = useState("");
   const [open, setOpen] = useState(false)
